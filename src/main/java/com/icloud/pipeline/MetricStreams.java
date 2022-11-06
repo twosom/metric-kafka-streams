@@ -28,12 +28,11 @@ public class MetricStreams {
         var metrics = builder.<String, String>stream(METRIC_ALL_TOPIC_NAME);
         metrics.split()
                 .branch(MetricJsonUtils.getPredicateByResource("cpu"),
-                        Branched.withFunction(c -> {
+                        Branched.withConsumer(c -> {
                             c.to(METRIC_CPU_TOPIC_NAME);
                             c.filter(MetricJsonUtils.getPredicateByTotalCPUUsage(0.5))
                                     .mapValues(MetricJsonUtils::getHostTimestamp)
                                     .to(METRIC_CPU_ALERT_TOPIC_NAME);
-                            return c;
                         }))
                 .branch(MetricJsonUtils.getPredicateByResource("memory"),
                         Branched.withConsumer(c -> c.to(METRIC_MEMORY_TOPIC_NAME)));
